@@ -1,4 +1,6 @@
-import { useState, KeyboardEvent } from "react";
+import { useState } from "react";
+
+import type { KeyboardEvent } from "react";
 
 interface ChatInputProps {
     onSubmit: (prompt: string) => void;
@@ -12,11 +14,13 @@ export default function ChatInput({
     const [prompt, setPrompt] = useState("");
 
     function handleSubmit() {
-        if (!prompt.trim()) {
+        const normalizedPrompt = prompt.trim();
+
+        if (!normalizedPrompt || loading) {
             return;
         }
 
-        onSubmit(prompt);
+        onSubmit(normalizedPrompt);
         setPrompt("");
     }
 
@@ -56,6 +60,7 @@ export default function ChatInput({
             />
 
             <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={loading}
                 style={{

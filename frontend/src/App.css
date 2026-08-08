@@ -57,6 +57,53 @@ textarea {
   font-family: inherit;
 }
 
+.markdown-content {
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin: 1.1em 0 .5em;
+}
+
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child {
+  margin-top: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.4rem;
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  padding: 14px;
+  border-radius: 10px;
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.markdown-content code {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: #f3f4f6;
+}
+
+.markdown-content pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.copy-error {
+  margin: 10px 0 0;
+  color: #be185d;
+  font-size: 14px;
+}
+
 .error {
   margin: 18px 0;
   padding: 14px 18px;

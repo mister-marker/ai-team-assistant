@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import ReactMarkdown from "react-markdown";
+
 interface ChatMessageProps {
     answer: string;
 }
@@ -8,15 +10,25 @@ export default function ChatMessage({
     answer,
 }: ChatMessageProps) {
     const [copied, setCopied] = useState(false);
+    const [copyError, setCopyError] = useState("");
 
     async function handleCopy() {
-        await navigator.clipboard.writeText(answer);
+        setCopyError("");
 
-        setCopied(true);
+        try {
+            if (!navigator.clipboard) {
+                throw new Error("Clipboard API is unavailable.");
+            }
 
-        setTimeout(() => {
-            setCopied(false);
-        }, 2000);
+            await navigator.clipboard.writeText(answer);
+            setCopied(true);
+
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        } catch {
+            setCopyError("Copy is unavailable in this browser.");
+        }
     }
 
     if (!answer) {
@@ -35,14 +47,8 @@ export default function ChatMessage({
         >
             <h3>AI Response</h3>
 
-            <div
-                style={{
-                    whiteSpace: "pre-wrap",
-                    lineHeight: 1.6,
-                    marginBottom: "18px",
-                }}
-            >
-                {answer}
+            <div className="markdown-content">
+                <ReactMarkdown>{answer}</ReactMarkdown>
             </div>
 
             <button
@@ -59,6 +65,12 @@ export default function ChatMessage({
             >
                 {copied ? "✓ Copied" : "Copy Answer"}
             </button>
+
+            {copyError && (
+                <p className="copy-error" role="alert">
+                    {copyError}
+                </p>
+            )}
         </div>
     );
 }

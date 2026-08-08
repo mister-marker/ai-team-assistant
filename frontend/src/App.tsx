@@ -28,20 +28,42 @@ export default function App() {
     const [error, setError] =
         useState("");
 
-    async function loadHistory() {
-        try {
-            const items = await getHistory();
-            setHistory(items);
-        } catch (error) {
-            console.error(error);
-        }
+    async function loadHistory(): Promise<void> {
+        const items = await getHistory();
+        setHistory(items);
     }
 
     useEffect(() => {
-        loadHistory();
+        let isMounted = true;
+
+        getHistory()
+            .then((items) => {
+                if (isMounted) {
+                    setHistory(items);
+                }
+            })
+            .catch((error: unknown) => {
+                if (!isMounted) {
+                    return;
+                }
+
+                setError(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to load history.",
+                );
+            });
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     async function handleSubmit(prompt: string) {
+        if (loading) {
+            return;
+        }
+
         setLoading(true);
         setError("");
 

@@ -6,6 +6,16 @@ import type {
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
+async function getErrorMessage(response: Response): Promise<string> {
+    const error = await response.json().catch(() => null);
+
+    if (typeof error?.detail === "string") {
+        return error.detail;
+    }
+
+    return "Failed to contact AI service.";
+}
+
 export async function askAI(
     request: ChatRequest,
 ): Promise<ChatResponse> {
@@ -18,11 +28,7 @@ export async function askAI(
     });
 
     if (!response.ok) {
-        const error = await response.json().catch(() => null);
-
-        throw new Error(
-            error?.detail ?? "Failed to contact AI service.",
-        );
+        throw new Error(await getErrorMessage(response));
     }
 
     return (await response.json()) as ChatResponse;
@@ -34,9 +40,7 @@ export async function getHistory(): Promise<HistoryItem[]> {
     );
 
     if (!response.ok) {
-        throw new Error(
-            "Failed to load history.",
-        );
+        throw new Error(await getErrorMessage(response));
     }
 
     return (await response.json()) as HistoryItem[];
