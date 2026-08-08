@@ -1,0 +1,45 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/venv/
+backend/.venv/
+venv/
+.venv/
+
+# JavaScript / Vite
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# IDE and operating system files
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# AI coding sessions can contain prompts, source code and credentials.
+.aider.chat.history.md
+.aider.input.history
+.codex/
+
+# Local reports and temporary files
+*.log
+coverage/
+tmp/
+
