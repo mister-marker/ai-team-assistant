@@ -4,13 +4,19 @@ import type {
     HistoryItem,
 } from "./types";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ??
+    "http://127.0.0.1:8000";
 
 async function getErrorMessage(response: Response): Promise<string> {
     const error = await response.json().catch(() => null);
 
     if (typeof error?.detail === "string") {
         return error.detail;
+    }
+
+    if (typeof error?.error?.message === "string") {
+        return error.error.message;
     }
 
     return "Failed to contact AI service.";

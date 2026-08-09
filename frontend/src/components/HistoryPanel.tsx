@@ -46,6 +46,21 @@ export default function HistoryPanel({
                             cursor: "pointer",
                         }}
                     >
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                gap: "12px",
+                                color: "#6b7280",
+                                fontSize: "12px",
+                            }}
+                        >
+                            <span>{item.mode}</span>
+                            <time dateTime={item.created_at}>
+                                {new Date(item.created_at).toLocaleString()}
+                            </time>
+                        </div>
+
                         <strong>Prompt:</strong>
 
                         <div

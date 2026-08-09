@@ -14,6 +14,9 @@ export interface ChatResponse {
 }
 
 export interface HistoryItem {
+    id: string;
+    mode: AssistantMode;
     prompt: string;
     answer: string;
+    created_at: string;
 }
