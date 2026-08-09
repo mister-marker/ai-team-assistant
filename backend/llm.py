@@ -17,6 +17,7 @@ load_dotenv()
 BASE_URL = os.getenv("BASE_URL")
 API_KEY = os.getenv("API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "45"))
 
 DEFAULT_MODE = "brainstormer"
 DEFAULT_TEMPERATURE = 0.7
@@ -81,6 +82,8 @@ def _get_client() -> AsyncOpenAI:
     return AsyncOpenAI(
         api_key=API_KEY,
         base_url=BASE_URL,
+        timeout=LLM_TIMEOUT_SECONDS,
+        max_retries=0,
     )
 
 
@@ -127,5 +130,7 @@ async def ask_llm(mode: str, prompt: str) -> str:
         max_tokens=MAX_OUTPUT_TOKENS,
     )
 
-    print(response)
+    if not response.choices:
+        raise RuntimeError("LLM provider returned no choices.")
+
     return response.choices[0].message.content or ""
