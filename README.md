@@ -1,18 +1,18 @@
 # AI Team Assistant
 
-Мини-дашборд для команды: пользователь выбирает роль AI-ассистента, задает вопрос, получает аккуратно оформленный Markdown-ответ и может вернуться к последним пяти запросам.
+Мини-дашборд для команды: выберите роль AI-ассистента, задайте вопрос, получите структурированный Markdown-ответ и вернитесь к истории последних пяти запросов.
 
-Проект сделан как учебный fullstack MVP под формат короткого тестового задания. Фокус не только на вызове LLM, а на законченном пользовательском сценарии, понятной структуре, безопасном backend-контракте и проверяемом качестве.
+Проект создан как учебный fullstack MVP для демонстрации интеграции с LLM, построения безопасного API и минималистичного, но функционального интерфейса. Акцент сделан на законченном пользовательском сценарии, чистой структуре проекта и понятной обработке ошибок.
 
 ## Возможности
 
 - 4 режима ассистента: Brainstormer, Code Reviewer, Product Manager, Technical Writer.
 - Отправка запроса в OpenAI-compatible API через FastAPI backend.
-- Markdown-рендеринг ответа, включая списки, заголовки и блоки кода.
-- Кнопка копирования ответа.
+- Markdown-рендеринг ответа: заголовки, списки, блоки кода и таблицы.
+- Копирование ответа в буфер обмена.
 - История последних 5 успешных запросов с ролью и временем.
 - Loading/error states на frontend.
-- Безопасные ответы об ошибках без утечки внутренних exception details.
+- Безопасный backend-контракт ошибок без утечки внутренних exception details.
 - Health endpoint для smoke-test и будущего deployment.
 
 ## Архитектура
@@ -25,14 +25,14 @@ flowchart LR
     LLM --> Provider["OpenAI-compatible provider"]
 ```
 
-Backend хранит секретный API key только в локальном `.env`. Frontend обращается к backend через `VITE_API_BASE_URL` и не знает токен провайдера.
+Frontend обращается к backend через `VITE_API_BASE_URL`. Backend хранит API key только в server-side environment и вызывает LLM-провайдера через OpenAI-compatible клиент.
 
-## Структура
+## Структура проекта
 
 ```text
-.
+ai-dashbord/
 ├── backend/
-│   ├── main.py              # FastAPI routes, validation, errors, history
+│   ├── main.py              # FastAPI routes, CORS, error handlers, history
 │   ├── llm.py               # LLM client and role-specific system prompts
 │   ├── requirements.txt
 │   ├── .env.example
@@ -46,44 +46,40 @@ Backend хранит секретный API key только в локально
 │   │   └── components/
 │   ├── .env.example
 │   ├── package.json
+│   ├── package-lock.json
 │   └── vite.config.ts
 ├── .gitignore
 └── README.md
 ```
 
-Локальные заметки, черновики, AI history и внутренние документы не входят в публичную часть проекта.
-
-## Локальный запуск
+## Быстрый старт
 
 ### Backend
 
 ```bash
-cd /Users/vladislavpoteryaev/Development/ai-dashbord/backend
-source venv/bin/activate
-python3 -m uvicorn main:app --reload --port 8000
-```
-
-Если окружение создается с нуля:
-
-```bash
-cd /Users/vladislavpoteryaev/Development/ai-dashbord/backend
+cd backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+python3 -m uvicorn main:app --reload --port 8000
 ```
 
-После этого заполнить `backend/.env` реальными значениями.
+После запуска:
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- Health check: `http://127.0.0.1:8000/health`
 
 ### Frontend
 
 ```bash
-cd /Users/vladislavpoteryaev/Development/ai-dashbord/frontend
+cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-Открыть `http://localhost:5173`.
+Откройте `http://localhost:5173`.
 
 ## Переменные окружения
 
@@ -108,38 +104,39 @@ Frontend, файл `frontend/.env`:
 
 ## Проверка качества
 
-Backend unit tests:
+Backend:
 
 ```bash
-cd /Users/vladislavpoteryaev/Development/ai-dashbord
 backend/venv/bin/python -m pytest backend/tests -q
 backend/venv/bin/python -m compileall -q backend
 ```
 
-Frontend build and lint:
+Frontend:
 
 ```bash
-cd /Users/vladislavpoteryaev/Development/ai-dashbord/frontend
+cd frontend
 npm run build
 npm run lint
 ```
 
-Smoke-test живого backend:
+Smoke-test:
 
 ```bash
 curl -i http://127.0.0.1:8000/health
 curl -i http://127.0.0.1:8000/history
 ```
 
-POST `/chat` можно проверить через Swagger UI:
+POST `/chat` можно проверить через Swagger UI или curl:
 
-```text
-http://127.0.0.1:8000/docs
+```bash
+curl -X POST http://127.0.0.1:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Предложи три идеи для командного AI-сервиса", "mode": "brainstormer"}'
 ```
 
-## Ошибки LLM-провайдера
+## Обработка ошибок
 
-Backend не возвращает пользователю сырой текст exception. Клиент получает безопасный контракт:
+Backend не передает клиенту сырые исключения LLM-провайдера. Вместо этого возвращается стандартизированный JSON-ответ:
 
 ```json
 {
@@ -151,7 +148,17 @@ Backend не возвращает пользователю сырой текст
 }
 ```
 
-Например, `503 Service Unavailable` от TokenRouter с `cache_only_cold` означает, что провайдер временно не принял cold/overloaded request. В таком случае frontend показывает понятную ошибку, а backend пишет подробности только в серверный лог.
+Детали пишутся в серверный лог и доступны разработчику по `request_id`.
+
+## Deployment
+
+Рекомендуемая схема для MVP:
+
+- backend: Render Web Service, root directory `backend`;
+- frontend: Vercel, root directory `frontend`;
+- секретный `API_KEY` хранится только в Render;
+- `VITE_API_BASE_URL` в Vercel указывает на публичный URL Render backend;
+- `FRONTEND_ORIGINS` в Render содержит Vercel-домен frontend.
 
 ## Текущие ограничения
 
@@ -159,14 +166,12 @@ Backend не возвращает пользователю сырой текст
 - Нет авторизации и multi-user режима.
 - Нет базы данных и persistent storage.
 - Retry/backoff стратегия минимальная, чтобы поведение было предсказуемым для MVP.
-- Deployment еще не подключен.
+- На бесплатном Render backend может засыпать после периода бездействия.
 
-## Roadmap
+## Планы развития
 
-- Улучшить visual design и mobile layout.
-- Расширить system prompts под реальные командные сценарии.
-- Добавить retry/backoff для временных provider errors.
-- Подготовить приватный GitHub repository.
-- Развернуть backend на Render или аналоге.
-- Развернуть frontend на Vercel.
-- Добавить CI: backend tests, frontend lint, frontend build.
+- Персистентное хранение истории в SQLite/PostgreSQL.
+- Streaming responses через Server-Sent Events.
+- Загрузка файлов как контекст для анализа кода или документов.
+- Метрики запросов и времени ответа.
+- Dockerfile и CI/CD pipeline.
