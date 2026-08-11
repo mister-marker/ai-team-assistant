@@ -27,6 +27,16 @@ MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", "3500"))
 # System prompts
 # ---------------------------------------------------------------------------
 
+RESPONSE_POLICY = """
+# ОБЩИЕ ПРАВИЛА ОТВЕТА
+- Отвечай компактно по умолчанию: 4-8 смысловых блоков или пунктов достаточно.
+- Не пытайся заполнить весь доступный лимит токенов.
+- Разворачивай ответ подробно только если пользователь просит "подробно",
+  "детально", "с примерами" или задача действительно требует длинного разбора.
+- Сначала дай практический ответ, затем пояснения.
+- Используй валидный Markdown. Для таблиц используй GitHub Flavored Markdown.
+"""
+
 SYSTEM_PROMPTS: dict[str, str] = {
     "code-reviewer": """
 # РОЛЬ
@@ -191,6 +201,7 @@ async def ask_llm(mode: str, prompt: str) -> str:
         mode,
         SYSTEM_PROMPTS[DEFAULT_MODE],
     )
+    system_prompt = f"{system_prompt.strip()}\n\n{RESPONSE_POLICY.strip()}"
 
     client = _get_client()
 

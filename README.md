@@ -95,6 +95,7 @@ Backend, файл `backend/.env`:
 | `MODEL_NAME` | Модель у выбранного провайдера |
 | `API_KEY` | Секретный ключ провайдера |
 | `LLM_TIMEOUT_SECONDS` | Timeout запроса к LLM |
+| `MAX_OUTPUT_TOKENS` | Максимальная длина ответа модели |
 | `FRONTEND_ORIGINS` | Разрешенные frontend origins для CORS |
 
 Frontend, файл `frontend/.env`:
