@@ -37,9 +37,9 @@ pnpm-debug.log*
 .aider.chat.history.md
 .aider.input.history
 .codex/
+docs/
 
 # Local reports and temporary files
 *.log
 coverage/
 tmp/
-

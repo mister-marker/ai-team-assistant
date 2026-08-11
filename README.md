@@ -1,136 +1,171 @@
-# AI Team Assistant Dashboard
+# AI Team Assistant
 
-Учебный fullstack-проект: локальный веб-дашборд с несколькими ролями AI-ассистента.
-Проект используется одновременно как MVP для тестового задания и как учебный стенд
-для освоения FastAPI, React/TypeScript, LLM-интеграций, тестирования и деплоя.
+Мини-дашборд для команды: пользователь выбирает роль AI-ассистента, задает вопрос, получает аккуратно оформленный Markdown-ответ и может вернуться к последним пяти запросам.
 
-> Статус: учебный MVP, local-first. Это не production-сервис и не публичный проект.
+Проект сделан как учебный fullstack MVP под формат короткого тестового задания. Фокус не только на вызове LLM, а на законченном пользовательском сценарии, понятной структуре, безопасном backend-контракте и проверяемом качестве.
 
-## Что решает продукт
+## Возможности
 
-Пользователь задаёт вопрос и выбирает роль помощника:
-
-- Code Reviewer — анализ кода и архитектуры;
-- Product Manager — требования, MVP и приоритизация;
-- Technical Writer — документация и инструкции;
-- Brainstormer — генерация и оценка идей.
-
-Обязательный сценарий: ввести вопрос → отправить его в LLM → увидеть ответ →
-скопировать ответ → открыть один из последних пяти запросов.
+- 4 режима ассистента: Brainstormer, Code Reviewer, Product Manager, Technical Writer.
+- Отправка запроса в OpenAI-compatible API через FastAPI backend.
+- Markdown-рендеринг ответа, включая списки, заголовки и блоки кода.
+- Кнопка копирования ответа.
+- История последних 5 успешных запросов с ролью и временем.
+- Loading/error states на frontend.
+- Безопасные ответы об ошибках без утечки внутренних exception details.
+- Health endpoint для smoke-test и будущего deployment.
 
 ## Архитектура
 
 ```mermaid
 flowchart LR
-    Browser["React + Vite + TypeScript"] -->|HTTP JSON| API["FastAPI API"]
-    API --> History["In-memory deque maxlen=5"]
+    Browser["React + Vite + TypeScript"] -->|HTTP JSON| API["FastAPI"]
+    API --> History["In-memory history, max 5"]
     API --> LLM["LLM adapter"]
     LLM --> Provider["OpenAI-compatible provider"]
 ```
 
-Текущий MVP намеренно не использует базу данных и авторизацию. Это допустимо для
-локального тестового задания, но должно быть явно обозначено как ограничение.
+Backend хранит секретный API key только в локальном `.env`. Frontend обращается к backend через `VITE_API_BASE_URL` и не знает токен провайдера.
 
-## Структура проекта
+## Структура
 
 ```text
 .
 ├── backend/
-│   ├── main.py              # FastAPI routes, validation, CORS, history
-│   ├── llm.py               # LLM client and role-specific prompts
+│   ├── main.py              # FastAPI routes, validation, errors, history
+│   ├── llm.py               # LLM client and role-specific system prompts
 │   ├── requirements.txt
-│   └── .env.example
+│   ├── .env.example
+│   └── tests/
+│       └── test_main.py
 ├── frontend/
 │   ├── src/
 │   │   ├── App.tsx
 │   │   ├── api.ts
 │   │   ├── types.ts
 │   │   └── components/
+│   ├── .env.example
 │   ├── package.json
 │   └── vite.config.ts
-├── docs/
-│   ├── technical-specification.md
-│   ├── mentorship-roadmap.md
-│   └── test-task-follow-up.md
+├── .gitignore
 └── README.md
 ```
+
+Локальные заметки, черновики, AI history и внутренние документы не входят в публичную часть проекта.
 
 ## Локальный запуск
 
 ### Backend
 
 ```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+cd /Users/vladislavpoteryaev/Development/ai-dashbord/backend
+source venv/bin/activate
+python3 -m uvicorn main:app --reload --port 8000
+```
+
+Если окружение создается с нуля:
+
+```bash
+cd /Users/vladislavpoteryaev/Development/ai-dashbord/backend
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Заполнить .env локальным ключом и моделью
-uvicorn main:app --reload --port 8000
 ```
+
+После этого заполнить `backend/.env` реальными значениями.
 
 ### Frontend
 
-В другом терминале:
-
 ```bash
-cd frontend
-npm ci
+cd /Users/vladislavpoteryaev/Development/ai-dashbord/frontend
+npm install
 npm run dev
 ```
 
 Открыть `http://localhost:5173`.
 
-Текущая версия frontend использует URL backend, зашитый в `src/api.ts`. Это один из
-первых пунктов следующего спринта: заменить его на `VITE_API_BASE_URL` с безопасным
-значением по умолчанию для localhost.
-
 ## Переменные окружения
 
-Backend читает:
+Backend, файл `backend/.env`:
 
 | Переменная | Назначение |
 |---|---|
 | `BASE_URL` | URL OpenAI-compatible API |
-| `MODEL_NAME` | Идентификатор модели у провайдера |
+| `MODEL_NAME` | Модель у выбранного провайдера |
 | `API_KEY` | Секретный ключ провайдера |
+| `LLM_TIMEOUT_SECONDS` | Timeout запроса к LLM |
+| `FRONTEND_ORIGINS` | Разрешенные frontend origins для CORS |
 
-Никогда не добавляйте `.env`, ключи и содержимое Aider/Codex history в Git,
-скриншоты, публичные issue или prompt для внешнего агента. Если ключ уже попал
-в историю терминала или Aider, его нужно отозвать и выпустить заново.
+Frontend, файл `frontend/.env`:
 
-## Проверки качества
+| Переменная | Назначение |
+|---|---|
+| `VITE_API_BASE_URL` | URL backend API |
 
-Перед демонстрацией должны проходить:
+Файлы `.env`, `.aider.chat.history.md`, `.aider.input.history`, `.codex/` и `docs/` не должны попадать в GitHub.
+
+## Проверка качества
+
+Backend unit tests:
 
 ```bash
-cd frontend
+cd /Users/vladislavpoteryaev/Development/ai-dashbord
+backend/venv/bin/python -m pytest backend/tests -q
+backend/venv/bin/python -m compileall -q backend
+```
+
+Frontend build and lint:
+
+```bash
+cd /Users/vladislavpoteryaev/Development/ai-dashbord/frontend
 npm run build
 npm run lint
 ```
 
-Для backend целевой набор команд:
+Smoke-test живого backend:
 
 ```bash
-python -m compileall backend
-pytest
+curl -i http://127.0.0.1:8000/health
+curl -i http://127.0.0.1:8000/history
 ```
 
-Текущие известные проблемы зафиксированы в [техническом ТЗ](docs/technical-specification.md).
+POST `/chat` можно проверить через Swagger UI:
 
-## Документы проекта
+```text
+http://127.0.0.1:8000/docs
+```
 
-- [Техническое ТЗ и критерии приёмки](docs/technical-specification.md)
-- [Roadmap обучения и работы с AI-агентами](docs/mentorship-roadmap.md)
-- [Reference design и стек компании](docs/reference-design-and-stack.md)
-- [Диагностика и deployment](docs/troubleshooting-and-deployment.md)
-- [Шаблон сообщения контакту по тестовому](docs/test-task-follow-up.md)
+## Ошибки LLM-провайдера
 
-## План развития
+Backend не возвращает пользователю сырой текст exception. Клиент получает безопасный контракт:
 
-1. Стабилизировать текущий local MVP: build, lint, Markdown, ошибки и конфигурация.
-2. Добавить автоматические тесты и единый контракт ошибок.
-3. Улучшить модель истории: `id`, `mode`, `created_at`, полный exchange.
-4. Добавить мобильный responsive UI и доступность.
-5. Подготовить Docker/production build и бесплатный preview deployment.
-6. Только после этого добавлять persistent storage, авторизацию и multi-user режим.
+```json
+{
+  "error": {
+    "code": "LLM_PROVIDER_ERROR",
+    "message": "AI provider returned an error.",
+    "request_id": "..."
+  }
+}
+```
+
+Например, `503 Service Unavailable` от TokenRouter с `cache_only_cold` означает, что провайдер временно не принял cold/overloaded request. В таком случае frontend показывает понятную ошибку, а backend пишет подробности только в серверный лог.
+
+## Текущие ограничения
+
+- История хранится в памяти процесса и очищается при перезапуске backend.
+- Нет авторизации и multi-user режима.
+- Нет базы данных и persistent storage.
+- Retry/backoff стратегия минимальная, чтобы поведение было предсказуемым для MVP.
+- Deployment еще не подключен.
+
+## Roadmap
+
+- Улучшить visual design и mobile layout.
+- Расширить system prompts под реальные командные сценарии.
+- Добавить retry/backoff для временных provider errors.
+- Подготовить приватный GitHub repository.
+- Развернуть backend на Render или аналоге.
+- Развернуть frontend на Vercel.
+- Добавить CI: backend tests, frontend lint, frontend build.
