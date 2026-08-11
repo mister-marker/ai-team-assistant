@@ -1,15 +1,11 @@
 import patrick from "../assets/patrick-thinking.gif";
 
 const messages = [
-    "🧠 Patrick and SpongeBob are brainstorming...",
-    "⭐ SpongeBob is explaining. Patrick is listening carefully...",
-    "🪼 Asking the jellyfish for expert advice...",
-    "💡 SpongeBob has an idea. Patrick is thinking about it...",
-    "🍍 Meeting at the Pineapple HQ...",
-    "🍔 Brain fuel acquired. Generating the answer...",
-    "🌊 Searching Bikini Bottom for inspiration...",
-    "🐚 Almost there...",
-    "🤖 Combining AI intelligence with Bikini Bottom wisdom...",
+    "Патрик думает. Это серьезно...",
+    "Собираю ответ без лишней воды...",
+    "Проверяю структуру и формулировки...",
+    "Ищу самый полезный вариант ответа...",
+    "Почти готово...",
 ];
 
 const randomMessage =
@@ -17,32 +13,17 @@ const randomMessage =
 
 export default function Thinking() {
     return (
-        <div
-            style={{
-                textAlign: "center",
-                padding: "40px",
-            }}
-        >
+        <div className="thinking-state">
             <img
                 src={patrick}
                 alt="Patrick is thinking..."
-                width={180}
+                width={176}
             />
 
-            <h3
-                style={{
-                    marginTop: "20px",
-                }}
-            >
-                {randomMessage}
-            </h3>
+            <h3>{randomMessage}</h3>
 
-            <p
-                style={{
-                    color: "#666",
-                }}
-            >
-                AI is generating the best answer for you.
+            <p>
+                AI готовит аккуратный ответ для команды.
             </p>
         </div>
     );

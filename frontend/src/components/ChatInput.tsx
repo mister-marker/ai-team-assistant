@@ -34,56 +34,26 @@ export default function ChatInput({
     }
 
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-                marginBottom: "24px",
-            }}
-        >
+        <div className="composer">
             <textarea
-                rows={6}
-                placeholder="Ask your AI assistant..."
+                rows={5}
+                aria-label="Вопрос для ассистента"
+                placeholder="Введите вопрос для ассистента..."
                 value={prompt}
                 onChange={(event) =>
                     setPrompt(event.target.value)
                 }
                 onKeyDown={handleKeyDown}
-                style={{
-                    padding: "14px",
-                    borderRadius: "12px",
-                    border: "1px solid #d1d5db",
-                    resize: "vertical",
-                    fontSize: "15px",
-                }}
             />
 
             <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                style={{
-                    padding: "12px",
-                    borderRadius: "12px",
-                    border: "none",
-                    background: "#4f46e5",
-                    color: "white",
-                    fontWeight: 600,
-                    cursor: loading ? "default" : "pointer",
-                }}
+                className="primary-button"
             >
-                {loading ? "Thinking..." : "Ask AI"}
+                {loading ? "Думаю..." : "Спросить AI"}
             </button>
-
-            <small
-                style={{
-                    color: "#6b7280",
-                }}
-            >
-                Tip: Press <strong>Ctrl + Enter</strong> to send your
-                request.
-            </small>
         </div>
     );
 }

@@ -88,21 +88,48 @@ export default function App() {
     }
 
     function handleHistory(item: HistoryItem) {
+        setMode(item.mode);
         setAnswer(item.answer);
     }
 
     return (
-        <main className="container">
-            <header className="header">
-                <h1>🤖 AI Team Assistant</h1>
+        <main className="app-shell">
+            <header className="hero">
+                <div className="brand-mark" aria-hidden="true">
+                    🤖
+                </div>
 
-                <p>
-                    A lightweight dashboard powered by
-                    FastAPI + React + OpenAI-compatible API.
-                </p>
+                <div className="hero-copy">
+                    <span className="eyebrow">
+                        Командный AI-ассистент
+                    </span>
+
+                    <h1>AI Team Assistant</h1>
+
+                    <p>
+                        Выбери рабочую роль, задай вопрос и получи
+                        структурированный ответ, который можно сразу
+                        использовать в командной работе.
+                    </p>
+                </div>
             </header>
 
-            <section className="card">
+            <section
+                className="workspace-panel"
+                aria-labelledby="composer-title"
+            >
+                <div className="section-heading">
+                    <div>
+                        <span className="eyebrow">
+                            Режим работы
+                        </span>
+
+                        <h2 id="composer-title">
+                            Сформулируй задачу для ассистента
+                        </h2>
+                    </div>
+                </div>
+
                 <ModeSelector
                     value={mode}
                     onChange={setMode}
@@ -122,11 +149,14 @@ export default function App() {
                 {loading ? (
                     <Thinking />
                 ) : (
-                    <ChatMessage answer={answer} /> 
-                )} 
+                    <ChatMessage answer={answer} />
+                )}
             </section>
 
-            <section className="card">
+            <section
+                className="workspace-panel history-section"
+                aria-labelledby="history-title"
+            >
                 <HistoryPanel
                     history={history}
                     onSelect={handleHistory}

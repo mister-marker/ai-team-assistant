@@ -1,5 +1,12 @@
 import type { HistoryItem } from "../types";
 
+const modeLabels: Record<HistoryItem["mode"], string> = {
+    "brainstormer": "Brainstormer",
+    "code-reviewer": "Code Reviewer",
+    "product-manager": "Product Manager",
+    "technical-writer": "Technical Writer",
+};
+
 interface HistoryPanelProps {
     history: HistoryItem[];
     onSelect: (item: HistoryItem) => void;
@@ -10,69 +17,49 @@ export default function HistoryPanel({
     onSelect,
 }: HistoryPanelProps) {
     return (
-        <div
-            style={{
-                marginTop: "24px",
-                padding: "20px",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-                background: "#ffffff",
-            }}
-        >
-            <h3>Recent Requests</h3>
+        <div className="history-panel">
+            <div className="section-heading compact">
+                <div>
+                    <span className="eyebrow">
+                        Последние запросы
+                    </span>
+
+                    <h2 id="history-title">
+                        История
+                    </h2>
+                </div>
+            </div>
 
             {history.length === 0 ? (
-                <p
-                    style={{
-                        color: "#6b7280",
-                    }}
-                >
-                    No history yet.
+                <p className="empty-state">
+                    Здесь появятся последние успешные запросы.
                 </p>
             ) : (
-                history.map((item, index) => (
-                    <button
-                        key={index}
-                        onClick={() => onSelect(item)}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            textAlign: "left",
-                            padding: "12px",
-                            marginTop: "10px",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "10px",
-                            background: "#f9fafb",
-                            cursor: "pointer",
-                        }}
-                    >
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                gap: "12px",
-                                color: "#6b7280",
-                                fontSize: "12px",
-                            }}
+                <div className="history-list">
+                    {history.map((item) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => onSelect(item)}
+                            className="history-item"
                         >
-                            <span>{item.mode}</span>
-                            <time dateTime={item.created_at}>
-                                {new Date(item.created_at).toLocaleString()}
-                            </time>
-                        </div>
+                            <div className="history-meta">
+                                <span>{modeLabels[item.mode]}</span>
+                                <time dateTime={item.created_at}>
+                                    {new Date(
+                                        item.created_at,
+                                    ).toLocaleString()}
+                                </time>
+                            </div>
 
-                        <strong>Prompt:</strong>
+                            <strong>Запрос</strong>
 
-                        <div
-                            style={{
-                                marginTop: "6px",
-                                color: "#374151",
-                            }}
-                        >
-                            {item.prompt}
-                        </div>
-                    </button>
-                ))
+                            <p>
+                                {item.prompt}
+                            </p>
+                        </button>
+                    ))}
+                </div>
             )}
         </div>
     );

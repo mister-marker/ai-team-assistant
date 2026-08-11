@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessageProps {
     answer: string;
@@ -27,7 +28,7 @@ export default function ChatMessage({
                 setCopied(false);
             }, 2000);
         } catch {
-            setCopyError("Copy is unavailable in this browser.");
+            setCopyError("Копирование недоступно в этом браузере.");
         }
     }
 
@@ -36,34 +37,30 @@ export default function ChatMessage({
     }
 
     return (
-        <div
-            style={{
-                marginTop: "24px",
-                padding: "20px",
-                borderRadius: "16px",
-                border: "1px solid #e5e7eb",
-                background: "#ffffff",
-            }}
-        >
-            <h3>AI Response</h3>
+        <article className="response-card">
+            <div className="response-header">
+                <div>
+                    <span className="eyebrow">Готовый результат</span>
+                    <h3>Ответ ассистента</h3>
+                </div>
+
+                <span className="status-pill">
+                    Markdown
+                </span>
+            </div>
 
             <div className="markdown-content">
-                <ReactMarkdown>{answer}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {answer}
+                </ReactMarkdown>
             </div>
 
             <button
+                type="button"
                 onClick={handleCopy}
-                style={{
-                    padding: "10px 18px",
-                    borderRadius: "10px",
-                    border: "none",
-                    background: "#4f46e5",
-                    color: "white",
-                    cursor: "pointer",
-                    fontWeight: 600,
-                }}
+                className="secondary-button"
             >
-                {copied ? "✓ Copied" : "Copy Answer"}
+                {copied ? "Скопировано" : "Копировать ответ"}
             </button>
 
             {copyError && (
@@ -71,6 +68,6 @@ export default function ChatMessage({
                     {copyError}
                 </p>
             )}
-        </div>
+        </article>
     );
 }
