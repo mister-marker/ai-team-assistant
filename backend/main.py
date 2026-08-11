@@ -218,6 +218,15 @@ async def chat(request: ChatRequest, http_request: Request) -> JSONResponse:
             request_id,
             exc.status_code,
         )
+
+        if exc.status_code >= 500:
+            return _error_response(
+                status_code=503,
+                code="LLM_PROVIDER_UNAVAILABLE",
+                message="AI provider is temporarily unavailable.",
+                request_id=request_id,
+            )
+
         return _error_response(
             status_code=502,
             code="LLM_PROVIDER_ERROR",
